@@ -1,0 +1,72 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: us-west-2
+  version: "1.25"
+
+iam:
+  withOIDC: true
+
+vpc:
+  id: vpc-0b4241f730b340531
+  subnets:
+    public:
+      us-west-2a:
+          id: "subnet-0a11af0a1aa1b1541"
+      us-west-2b:
+          id: "subnet-01b6885c030a95bf5"
+      us-west-2c:
+          id: "subnet-0e7c6e3052e92ccd3"
+
+managedNodeGroups:
+  - name: ng-cpu-1
+    instanceType: t3a.medium
+    desiredCapacity: 2
+    volumeSize: 30
+    volumeType: gp3
+    ssh:
+      allow: true
+      publicKeyPath: /home/ubuntu/.ssh/id_rsa.pub
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+        efs: true
+        cloudWatch: true
+  - name: ng-cpu-spot-1
+    instanceType: t3a.medium
+    volumeSize: 40
+    desiredCapacity: 5
+    ssh:
+      allow: true
+      publicKeyPath: /home/ubuntu/.ssh/id_rsa.pub
+    spot: true
+    labels:
+      role: spot
+    propagateASGTags: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+        efs: true
+        cloudWatch: true
+  # - name: ng-dedicated-model
+  #   instanceType: t3a.2xlarge
+  #   volumeSize: 40
+  #   desiredCapacity: 1
+  #   ssh:
+  #     allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
+  #   iam:
+  #     withAddonPolicies:
+  #       autoScaler: true
+  #       ebs: true
+  #       efs: true
+  #       awsLoadBalancerController: true
